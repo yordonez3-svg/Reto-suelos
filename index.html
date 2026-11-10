@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reto de Mecánica de Suelos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Plan: perfil de suelo como lenguaje visual; azul agua como acento, tonos de arena para los estratos.
+     Layout: una columna para celular; datos + diagrama arriba, pregunta abajo. */
+  --bg:#eef2f1;
+  --card:#ffffff;
+  --ink:#1c2826;
+  --muted:#5b6b68;
+  --line:#d3dcda;
+  --accent:#1f6f94;
+  --accent-ink:#ffffff;
+  --good:#23824f;
+  --good-bg:#e3f3ea;
+  --bad:#b23a2e;
+  --bad-bg:#f8e5e2;
+  --hint-bg:#fff4d6;
+  --sand:#dcc590;
+  --sandw:#b8a77c;
+  --clay:#a3825f;
+  --water:#9fcfe6;
+  --stone:#c8cfcd;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121a19;--card:#1b2624;--ink:#e6eeec;--muted:#9fb0ac;--line:#2f3d3a;
+    --accent:#5fb3d9;--accent-ink:#0d1b22;--good:#5cc98c;--good-bg:#173126;--bad:#f08a7e;--bad-bg:#3a1f1c;
+    --hint-bg:#3a3219;--stone:#4a5553;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121a19;--card:#1b2624;--ink:#e6eeec;--muted:#9fb0ac;--line:#2f3d3a;
+  --accent:#5fb3d9;--accent-ink:#0d1b22;--good:#5cc98c;--good-bg:#173126;--bad:#f08a7e;--bad-bg:#3a1f1c;
+  --hint-bg:#3a3219;--stone:#4a5553;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:19px;line-height:1.45}
+main{max-width:760px;margin:0 auto;padding:16px 16px 48px;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:2rem;font-weight:800}
+h2{font-size:1.5rem;font-weight:800}
+h3{font-size:1.1rem;font-weight:600}
+p{margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.who{color:var(--muted);font-size:.95rem}
+.score{font-family:var(--display);font-weight:800;font-size:1.3rem;font-variant-numeric:tabular-nums;background:var(--accent);color:var(--accent-ink);padding:4px 14px;border-radius:999px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.lvl-tag{font-weight:700;color:var(--accent);font-size:.95rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:.95rem;font-variant-numeric:tabular-nums;background:var(--bg)}
+.chip b{font-weight:700}
+svg.dia{width:100%;height:auto;max-width:460px;align-self:center;display:block}
+svg text{font-family:var(--body)}
+details>summary{cursor:pointer;font-weight:700;color:var(--accent);font-size:1rem}
+details[open]>summary{margin-bottom:12px}
+.qtext{font-size:1.15rem}
+.qtext em{font-style:normal;font-weight:700}
+form.ans{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.inwrap{display:flex;align-items:center;border:2px solid var(--line);border-radius:10px;background:var(--bg);flex:1 1 180px;min-width:0}
+.inwrap:focus-within{border-color:var(--accent)}
+.inwrap input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:1.3rem;padding:10px 12px;font-variant-numeric:tabular-nums;outline:none}
+.inwrap input:focus-visible{outline:none}
+.inwrap span{padding:0 12px;color:var(--muted);font-weight:600;white-space:nowrap}
+button{font:inherit;font-weight:700;border-radius:10px;border:2px solid transparent;padding:10px 18px;cursor:pointer;font-size:1.05rem}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.primary{background:var(--accent);color:var(--accent-ink)}
+.ghost{background:transparent;color:var(--accent);border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{text-align:left;background:var(--bg);color:var(--ink);border-color:var(--line);font-weight:600}
+.opt.right{border-color:var(--good);background:var(--good-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.fb{border-radius:10px;padding:12px 14px;font-weight:600}
+.fb.ok{background:var(--good-bg);color:var(--good)}
+.fb.no{background:var(--bad-bg);color:var(--bad)}
+.hint{background:var(--hint-bg);border-radius:10px;padding:12px 14px}
+.sol{border-left:4px solid var(--accent);padding:6px 0 6px 14px;display:flex;flex-direction:column;gap:4px;font-variant-numeric:tabular-nums}
+.sol .eq{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem;overflow-x:auto;white-space:nowrap}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.rules{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:baseline}
+.rules b{font-family:var(--display);font-size:1.2rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.big{font-family:var(--display);font-weight:800;font-size:3.4rem;line-height:1;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+td:last-child,th:last-child{text-align:right}
+.tiny{font-size:.9rem;color:var(--muted)}
+label.lbl{font-weight:600}
+.name-in{border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:1.2rem;padding:10px 12px;width:100%}
+.name-in:focus{border-color:var(--accent);outline:none}
+.list{display:flex;flex-direction:column;gap:8px}
+.lv{display:flex;gap:12px;align-items:center}
+.lv .n{font-family:var(--display);font-weight:800;color:var(--accent-ink);background:var(--accent);border-radius:8px;width:34px;height:34px;display:grid;place-items:center;flex:none}
+@media (prefers-reduced-motion:no-preference){.pop{animation:pop .25s ease-out}@keyframes pop{from{transform:scale(.97)}to{transform:none}}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function(){
+const GW = 9.81;
+const KEY = "reto-suelos-v1";
+const app = document.getElementById("app");
+const LEVELS = [
+  {t:"Compactación en la caja", d:"Cuánto suelo poner por capa y qué tan bien quedó compactado."},
+  {t:"Esfuerzos en un perfil de suelo", d:"Esfuerzo total, presión de poros y esfuerzo efectivo."},
+  {t:"Infiltración hacia arriba", d:"Esfuerzos con flujo ascendente y condición de ebullición."}
+];
+const PTS = [10,6,3];
+
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const r = (x,d) => Math.round(x*Math.pow(10,d))/Math.pow(10,d);
+const f = (x,d=2) => Number(x).toLocaleString("es-CO",{minimumFractionDigits:0,maximumFractionDigits:d});
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function gen(){
+  const d = {};
+  d.rho = pick([1.72,1.75,1.78,1.80,1.82,1.85,1.88,1.90]);
+  d.w = pick([10,11,12,13,14,15,16]);
+  d.gc = pick([95,100]);
+  d.hr = pick([10.4,10.5,10.6,10.8,11.0,11.2]);
+  d.wr = d.w + pick([-1,-0.5,0.5,1]);
+  d.H1 = pick([1.5,2,2.5,3]); d.gd = pick([15.5,16,16.5,17]);
+  d.H2 = pick([2,2.5,3,3.5]); d.gs2 = pick([18.5,19,19.5,20]);
+  d.H3 = pick([3,4,5]); d.gs3 = pick([17.5,18,18.5]);
+  d.a1 = pick([0.5,0.8,1,1.2]); d.a2 = pick([2,2.5,3]); d.gs = pick([18.5,19,19.5,20]);
+  const hcr = (d.gs-GW)/GW*d.a2;
+  d.h = Math.max(0.3, r(hcr*pick([0.4,0.5,0.6]),1));
+  d.id = Math.random().toString(36).slice(2,6).toUpperCase();
+  return d;
+}
+
+function build(d){
+  const Q = [];
+  // Nivel 1
+  const V = 25000, Ms = d.rho*V*(d.gc/100)/1000, Mh = Ms*(1+d.w/100);
+  const MhP = r(Mh,1), Vr = 2500*d.hr, rh = MhP*1000/Vr, rd = rh/(1+d.wr/100), gcr = rd/d.rho*100;
+  Q.push({l:0,type:"num",text:"¿Cuál es el volumen de <em>una capa</em> de 10 cm?",unit:"cm³",ans:V,abs:1,
+    hint:"V = L · B · h (todo en cm)",
+    sol:["V = 50 × 50 × 10",`V = ${f(V)} cm³`]});
+  Q.push({l:0,type:"num",text:`¿Cuánta masa de <em>suelo seco</em> debe quedar en cada capa para llegar al ${d.gc} % de compactación?`,unit:"kg",ans:Ms,rel:.015,
+    hint:"Ms = ρd,máx · V · GC (GC en decimal)",
+    sol:[`Ms = ${f(d.rho)} × ${f(V)} × ${f(d.gc/100)} = ${f(Ms*1000,0)} g`,`Ms = ${f(Ms)} kg`]});
+  Q.push({l:0,type:"num",text:"¿Cuánto <em>suelo húmedo</em> deben pesar en la balanza para cada capa?",unit:"kg",ans:Mh,rel:.015,
+    hint:"Mh = Ms · (1 + w), con w en decimal",
+    sol:[`Mh = ${f(Ms)} × (1 + ${f(d.w/100)})`,`Mh = ${f(Mh)} kg`]});
+  Q.push({l:0,type:"num",text:`Un compañero colocó <em>${f(MhP,1)} kg</em> de suelo húmedo en la capa 1, pero sin forzar la caja solo logró compactarla hasta <em>${f(d.hr,1)} cm</em>. La humedad real fue <em>${f(d.wr,1)} %</em>. ¿Qué densidad seca logró?`,unit:"g/cm³",ans:rd,abs:.012,
+    hint:"V real = 50 · 50 · h real → ρ = Mh / V real → ρd = ρ / (1 + w real)",
+    sol:[`V real = 50 × 50 × ${f(d.hr,1)} = ${f(Vr,0)} cm³`,`ρ = ${f(MhP*1000,0)} / ${f(Vr,0)} = ${f(rh,3)} g/cm³`,`ρd = ${f(rh,3)} / (1 + ${f(d.wr/100,3)}) = ${f(rd,3)} g/cm³`]});
+  Q.push({l:0,type:"num",text:"Con ese resultado, ¿cuál fue el <em>grado de compactación</em> de esa capa?",unit:"%",ans:gcr,abs:.8,
+    hint:"GC = ρd lograda / ρd,máx × 100",
+    sol:[`GC = ${f(rd,3)} / ${f(d.rho)} × 100`,`GC = ${f(gcr,1)} %`]});
+  Q.push({l:0,type:"mc",text:"Si una capa queda <em>más alta que la marca</em> con la misma masa de suelo, el grado de compactación…",
+    opts:["Es menor que el buscado","Es mayor que el buscado","No cambia"],ans:0,
+    sol:["La misma masa ocupa más volumen, así que la densidad seca baja y el GC también."]});
+
+  // Nivel 2
+  const sA = d.gd*d.H1, sB = sA + d.gs2*d.H2, uB = GW*d.H2, eB = sB-uB;
+  const sC = sB + d.gs3*d.H3, uC = GW*(d.H2+d.H3), eC = sC-uC;
+  Q.push({l:1,type:"mc",text:"En el punto A, justo en el nivel freático, ¿cuánto vale la presión de poros u?",
+    opts:["u = 0","u = γw · H1","u = γd · H1"],ans:0,
+    sol:["La presión de poros se mide desde el nivel freático. En A la columna de agua es cero."]});
+  Q.push({l:1,type:"num",text:"Esfuerzo total en el punto <em>A</em> (σA)",unit:"kPa",ans:sA,
+    hint:"σ = γ · H para cada estrato que está encima",
+    sol:[`σA = ${f(d.gd)} × ${f(d.H1)}`,`σA = ${f(sA)} kPa`]});
+  Q.push({l:1,type:"num",text:"Esfuerzo total en el punto <em>B</em> (σB)",unit:"kPa",ans:sB,
+    hint:"σB = σA + γsat · H2",
+    sol:[`σB = ${f(sA)} + ${f(d.gs2)} × ${f(d.H2)}`,`σB = ${f(sB)} kPa`]});
+  Q.push({l:1,type:"num",text:"Presión de poros en el punto <em>B</em> (uB)",unit:"kPa",ans:uB,
+    hint:"u = γw · (profundidad bajo el nivel freático)",
+    sol:[`uB = ${f(GW)} × ${f(d.H2)}`,`uB = ${f(uB)} kPa`]});
+  Q.push({l:1,type:"num",text:"Esfuerzo efectivo en el punto <em>B</em> (σ′B)",unit:"kPa",ans:eB,
+    hint:"σ′ = σ − u",
+    sol:[`σ′B = ${f(sB)} − ${f(uB)}`,`σ′B = ${f(eB)} kPa`]});
+  Q.push({l:1,type:"num",text:"Esfuerzo efectivo en el punto <em>C</em>, al fondo de la arcilla (σ′C)",unit:"kPa",ans:eC,
+    hint:"Calcula σC y uC primero. Luego σ′C = σC − uC",
+    sol:[`σC = ${f(sB)} + ${f(d.gs3)} × ${f(d.H3)} = ${f(sC)} kPa`,`uC = ${f(GW)} × (${f(d.H2)} + ${f(d.H3)}) = ${f(uC)} kPa`,`σ′C = ${f(sC)} − ${f(uC)} = ${f(eC)} kPa`]});
+  Q.push({l:1,type:"mc",text:"El esfuerzo efectivo representa…",
+    opts:["La presión del agua en los poros","El esfuerzo que se transmite por los contactos entre partículas","El peso total del suelo más el agua"],ans:1,
+    sol:["σ′ es la parte del esfuerzo que soporta el esqueleto de partículas. Controla la resistencia y la compresibilidad del suelo."]});
+
+  // Nivel 3
+  const z = d.a2/2, i = d.h/d.a2, gp = d.gs-GW;
+  const s3 = d.a1*GW + z*d.gs, u3 = (d.a1+z+i*z)*GW, e3 = z*gp - i*z*GW, eBB = d.a2*gp - d.h*GW;
+  const icr = gp/GW, hcr = icr*d.a2;
+  Q.push({l:2,type:"num",text:"¿Cuál es el gradiente hidráulico <em>i</em> en la arena?",unit:"",ans:i,abs:.006,
+    hint:"i = h / H2",
+    sol:[`i = ${f(d.h)} / ${f(d.a2)}`,`i = ${f(i,3)}`]});
+  Q.push({l:2,type:"num",text:`Esfuerzo total en el punto <em>C</em>, a z = ${f(z)} m bajo A (σC)`,unit:"kPa",ans:s3,
+    hint:"σC = H1 · γw + z · γsat",
+    sol:[`σC = ${f(d.a1)} × ${f(GW)} + ${f(z)} × ${f(d.gs)}`,`σC = ${f(s3)} kPa`]});
+  Q.push({l:2,type:"num",text:"Presión de poros en el punto <em>C</em> (uC)",unit:"kPa",ans:u3,
+    hint:"uC = (H1 + z + i · z) · γw",
+    sol:[`uC = (${f(d.a1)} + ${f(z)} + ${f(i,3)} × ${f(z)}) × ${f(GW)}`,`uC = ${f(u3)} kPa`]});
+  Q.push({l:2,type:"num",text:"Esfuerzo efectivo en el punto <em>C</em> (σ′C)",unit:"kPa",ans:e3,
+    hint:"σ′C = σC − uC, o directo: σ′C = z · γ′ − i · z · γw",
+    sol:[`γ′ = ${f(d.gs)} − ${f(GW)} = ${f(gp)} kN/m³`,`σ′C = ${f(z)} × ${f(gp)} − ${f(i,3)} × ${f(z)} × ${f(GW)}`,`σ′C = ${f(e3)} kPa`]});
+  Q.push({l:2,type:"mc",text:"Comparado con el mismo tanque <em>sin flujo</em>, el esfuerzo efectivo en C con flujo hacia arriba es…",
+    opts:["Mayor","Igual","Menor"],ans:2,
+    sol:["El agua que sube empuja las partículas hacia arriba: σ′ pierde el término i · z · γw."]});
+  Q.push({l:2,type:"num",text:"Esfuerzo efectivo en el fondo de la arena, punto <em>B</em> (σ′B)",unit:"kPa",ans:eBB,
+    hint:"σ′B = H2 · γ′ − h · γw",
+    sol:[`σ′B = ${f(d.a2)} × ${f(gp)} − ${f(d.h)} × ${f(GW)}`,`σ′B = ${f(eBB)} kPa`]});
+  Q.push({l:2,type:"num",text:"¿Cuál es el gradiente hidráulico <em>crítico</em> i<sub>cr</sub>?",unit:"",ans:icr,abs:.01,
+    hint:"Se obtiene haciendo σ′ = 0: icr = γ′ / γw",
+    sol:[`icr = ${f(gp)} / ${f(GW)}`,`icr = ${f(icr,3)}`]});
+  Q.push({l:2,type:"mc",text:"Si se abre más la válvula y el agua del piezómetro sube (h aumenta), el <em>esfuerzo total</em> en C…",
+    opts:["Aumenta, porque hay más presión de agua","Disminuye, porque el agua empuja hacia arriba","No cambia"],ans:2,
+    sol:["σ solo depende de lo que hay encima de C: la lámina de agua H1 y el suelo hasta z. Al subir h aumenta u, y por eso baja σ′, pero σ sigue igual."]});
+  Q.push({l:2,type:"mc",text:"Si h sigue subiendo hasta que el esfuerzo efectivo en la arena llega a cero, ¿qué le pasa a la arena?",
+    opts:["σ′ se duplica y la arena se densifica","σ′ = 0 y la arena entra en ebullición: pierde su resistencia","u = 0 y el agua deja de fluir"],ans:1,
+    sol:["Con σ′ = 0 no hay contacto efectivo entre granos. La arena se comporta como un líquido (ebullición o sifonamiento)."]});
+  return Q;
+}
+
+/* ---------- Diagramas ---------- */
+const T = (x,y,s,o="") => `<text x="${x}" y="${y}" ${o}>${s}</text>`;
+function dimV(x,y1,y2,label,side="end"){
+  const tx = side==="end" ? x-6 : x+6;
+  return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="${x-4}" y1="${y1}" x2="${x+4}" y2="${y1}" stroke="currentColor"/><line x1="${x-4}" y1="${y2}" x2="${x+4}" y2="${y2}" stroke="currentColor"/>
+  ${T(tx,(y1+y2)/2+5,label,`text-anchor="${side}" font-size="13" fill="currentColor"`)}`;
+}
+function dot(x,y,l){return `<circle cx="${x}" cy="${y}" r="4.5" fill="#1c2826"/>${T(x+9,y-5,l,'font-size="15" font-weight="700" fill="#1c2826"')}`;}
+
+function svg1(){
+  const L = [[180,"Capa 1","var(--sand)"],[140,"Capa 2","var(--sandw)"],[100,"Capa 3","var(--sand)"]];
+  let s = `<svg class="dia" viewBox="0 0 340 250" role="img" aria-label="Caja de 50 por 50 cm llena hasta 30 cm en tres capas de 10 cm" style="color:var(--ink)">`;
+  s += `<rect x="70" y="20" width="200" height="200" fill="none" stroke="currentColor" stroke-width="2.5"/>`;
+  L.forEach(([y,t,c])=>{ s += `<rect x="71" y="${y}" width="198" height="40" fill="${c}"/>${T(170,y+26,t,'text-anchor="middle" font-size="14" font-weight="600" fill="#1c2826"')}`;});
+  [[180,"10 cm"],[140,"20 cm"],[100,"30 cm"]].forEach(([y,t])=>{ s += `<line x1="60" y1="${y}" x2="282" y2="${y}" stroke="var(--accent)" stroke-dasharray="5 4" stroke-width="1.6"/>${T(286,y+5,t,'font-size="13" fill="currentColor"')}`;});
+  s += `<rect x="140" y="86" width="60" height="14" fill="var(--stone)" stroke="currentColor"/>${T(170,80,"Zapata",'text-anchor="middle" font-size="13" fill="currentColor"')}`;
+  s += `<line x1="70" y1="12" x2="270" y2="12" stroke="currentColor"/>${T(170,10,"50 cm",'text-anchor="middle" font-size="13" fill="currentColor"')}`;
+  s += dimV(50,20,220,"50 cm");
+  return s + `</svg>`;
+}
+function svg2(d){
+  const Ht = d.H1+d.H2+d.H3, k = 240/Ht, x0=100, w=220;
+  const Ls = [[d.H1,`Arena seca · γd = ${f(d.gd)}`,"var(--sand)","A"],[d.H2,`Arena saturada · γsat = ${f(d.gs2)}`,"var(--sandw)","B"],[d.H3,`Arcilla saturada · γsat = ${f(d.gs3)}`,"var(--clay)","C"]];
+  let y = 20, s = `<svg class="dia" viewBox="0 0 340 280" role="img" aria-label="Perfil de tres estratos con nivel freático en A" style="color:var(--ink)">`;
+  let pts = "";
+  Ls.forEach(([H,t,c,p])=>{
+    const h = H*k;
+    s += `<rect x="${x0}" y="${y}" width="${w}" height="${h}" fill="${c}" stroke="#1c2826" stroke-width=".8"/>`;
+    s += T(x0+w/2+10,y+h/2+5,t,'text-anchor="middle" font-size="12.5" font-weight="600" fill="#1c2826"');
+    s += dimV(70,y,y+h,`${f(H)} m`);
+    pts += dot(x0+12,y+h,p);
+    y += h;
+  });
+  const yA = 20+d.H1*k;
+  s += `<line x1="${x0}" y1="${yA}" x2="${x0+w}" y2="${yA}" stroke="var(--accent)" stroke-width="2.5"/>`;
+  s += `<path d="M ${x0+w-30} ${yA-14} l 14 0 l -7 11 z" fill="var(--accent)"/>${T(x0+w-38,yA-5,"NF",'text-anchor="end" font-size="12" font-weight="700" fill="#1c2826"')}`;
+  s += T(x0+w/2,15,"kN/m³ · γw = 9,81",'text-anchor="middle" font-size="12" fill="currentColor"');
+  return s + pts + `</svg>`;
+}
+function svg3(d){
+  const bot=246, k=(bot-24)/(d.a1+d.a2+d.h), top=24+d.h*k, yA=top+d.a1*k, yC=yA+(d.a2/2)*k, yh=top-d.h*k;
+  let s = `<svg class="dia" viewBox="0 0 340 300" role="img" aria-label="Tanque con arena y flujo de agua hacia arriba" style="color:var(--ink)">`;
+  s += `<rect x="70" y="${top}" width="160" height="${yA-top}" fill="var(--water)"/>`;
+  s += `<rect x="70" y="${yA}" width="160" height="${bot-yA}" fill="var(--sandw)"/>`;
+  s += `<rect x="70" y="${bot}" width="160" height="12" fill="var(--stone)" stroke="#1c2826" stroke-width=".8"/>`;
+  s += `<path d="M70 ${top-10} V ${bot+12} H 230 V ${top-10}" fill="none" stroke="currentColor" stroke-width="3"/>`;
+  s += `<rect x="141" y="${bot+12}" width="18" height="22" fill="var(--water)" stroke="currentColor"/>${T(165,bot+40,"Entrada",'font-size="12" fill="currentColor"')}`;
+  s += `<rect x="230" y="${bot+2}" width="56" height="8" fill="var(--water)" stroke="currentColor"/>`;
+  s += `<rect x="282" y="${yh-14}" width="12" height="${bot+10-(yh-14)}" fill="none" stroke="currentColor" stroke-width="1.5"/>`;
+  s += `<rect x="283" y="${yh}" width="10" height="${bot+9-yh}" fill="var(--water)"/>`;
+  s += `<line x1="230" y1="${top}" x2="300" y2="${top}" stroke="var(--accent)" stroke-dasharray="4 3"/>`;
+  s += `<line x1="250" y1="${yh}" x2="300" y2="${yh}" stroke="var(--accent)" stroke-dasharray="4 3"/>`;
+  s += dimV(262,yh,top,`h = ${f(d.h)} m`);
+  s += `<path d="M ${144} ${top-8} l 12 0 l -6 9 z" fill="var(--accent)"/>`;
+  [160,200].forEach(x=>{ s += `<path d="M ${x} ${bot-6} V ${bot-46} m -5 8 l 5 -8 l 5 8" fill="none" stroke="#1f6f94" stroke-width="2"/>`;});
+  s += dimV(50,top,yA,`${f(d.a1)} m`) + dimV(50,yA,bot,`${f(d.a2)} m`);
+  s += `<line x1="205" y1="${yA}" x2="205" y2="${yC}" stroke="#1c2826"/>${T(210,(yA+yC)/2+5,"z",'font-size="14" font-style="italic" fill="#1c2826"')}`;
+  s += T(36,(top+yA)/2+22,"H1",'text-anchor="end" font-size="11" fill="currentColor"') + T(36,(yA+bot)/2+22,"H2",'text-anchor="end" font-size="11" fill="currentColor"');
+  s += dot(96,yA,"A") + dot(96,yC,"C") + dot(96,bot,"B");
+  return s + `</svg>`;
+}
+function dataCard(lvl,d){
+  let chips = [];
+  if(lvl===0) chips = ["Caja: <b>50 × 50 cm</b>","Altura: <b>30 cm</b> en 3 capas de 10 cm",`ρd,máx = <b>${f(d.rho)} g/cm³</b>`,`w óptima = <b>${f(d.w)} %</b>`,`GC buscado = <b>${d.gc} %</b>`];
+  if(lvl===1) chips = [`Arena seca: H1 = <b>${f(d.H1)} m</b>, γd = <b>${f(d.gd)}</b>`,`Arena saturada: H2 = <b>${f(d.H2)} m</b>, γsat = <b>${f(d.gs2)}</b>`,`Arcilla: H3 = <b>${f(d.H3)} m</b>, γsat = <b>${f(d.gs3)}</b>`,"Pesos específicos en kN/m³","γw = <b>9,81 kN/m³</b>","NF en el punto A"];
+  if(lvl===2) chips = [`Agua sobre la arena: H1 = <b>${f(d.a1)} m</b>`,`Arena: H2 = <b>${f(d.a2)} m</b>`,`γsat = <b>${f(d.gs)} kN/m³</b>`,`h = <b>${f(d.h)} m</b>`,`C está a z = <b>${f(d.a2/2)} m</b> bajo A`,"γw = <b>9,81 kN/m³</b>"];
+  const svg = [svg1,svg2,svg3][lvl](d);
+  return `${svg}<div class="chips">${chips.map(c=>`<span class="chip">${c}</span>`).join("")}</div>`;
+}
+
+/* ---------- Estado ---------- */
+let S = null;
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){ try{ const x = JSON.parse(localStorage.getItem(KEY)); if(x && x.d && x.name) return x; }catch(e){} return null; }
+function total(){ return S.res.reduce((a,b)=>a+(b.pts||0),0); }
+const MAX = () => S.res.length*10;
+
+function header(){
+  const done = S.res.filter(x=>x.done).length;
+  return `<div class="top"><div><div class="lvl-tag">Nivel ${S.lvl+1} de 3</div><div class="who">${esc(S.name)} · datos ${S.d.id}</div></div><div class="score" aria-label="Puntos">${total()} pts</div></div>
+  <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${S.res.length}" aria-valuenow="${done}"><i style="width:${done/S.res.length*100}%"></i></div>`;
+}
+
+function renderStart(){
+  app.innerHTML = `
+  <div class="card pop">
+    <h1>Reto de Mecánica de Suelos</h1>
+    <p>Compactación, esfuerzos efectivos e infiltración hacia arriba.</p>
+    <div class="list">
+      ${LEVELS.map((L,i)=>`<div class="lv"><span class="n">${i+1}</span><div><b>${L.t}</b><div class="tiny">${L.d}</div></div></div>`).join("")}
+    </div>
+  </div>
+  <div class="card">
+    <h3>Cómo se ganan puntos</h3>
+    <div class="rules"><b>10</b><span>respuesta correcta</span><b>1</b><span>solo un intento por pregunta: revisa bien antes de responder</span><b>−3</b><span>si pides la pista</span></div>
+    <p class="tiny">Se acepta un pequeño margen por redondeo. Usa γw = 9,81 kN/m³. Puedes escribir decimales con coma o con punto.</p>
+  </div>
+  <form class="card" id="f">
+    <label class="lbl" for="nm">Tu nombre</label>
+    <input class="name-in" id="nm" autocomplete="name" required maxlength="60" placeholder="Nombre y apellido">
+    <button class="primary" type="submit">Empezar</button>
+  </form>`;
+  document.getElementById("f").addEventListener("submit",e=>{
+    e.preventDefault();
+    const n = document.getElementById("nm").value.trim(); if(!n) return;
+    const d = gen(); const Q = build(d);
+    S = {name:n,d,qi:0,lvl:0,phase:"intro",res:Q.map(()=>({pts:0,tries:0,hint:false,done:false,ok:false,picked:[]}))};
+    save(); render();
+  });
+}
+
+function renderIntro(){
+  const L = LEVELS[S.lvl];
+  app.innerHTML = `<div class="card">${header()}</div>
+  <div class="card pop"><h2>${L.t}</h2><p>${L.d}</p>${dataCard(S.lvl,S.d)}<button class="primary" id="go">Comenzar nivel ${S.lvl+1}</button></div>`;
+  document.getElementById("go").onclick = ()=>{ S.phase="q"; save(); render(); };
+}
+
+function renderQ(){
+  const Q = build(S.d), q = Q[S.qi], st = S.res[S.qi];
+  const lvlQs = Q.filter(x=>x.l===q.l).length, idx = Q.slice(0,S.qi+1).filter(x=>x.l===q.l).length;
+  let body = "";
+  if(q.type==="num"){
+    body = `<form class="ans" id="af"><div class="inwrap"><input id="v" inputmode="decimal" autocomplete="off" aria-label="Tu respuesta" ${st.done?"disabled":""} placeholder="Tu respuesta">${q.unit?`<span>${q.unit}</span>`:""}</div>
+      <button class="primary" type="submit" ${st.done?"disabled":""}>Comprobar</button></form>`;
+  } else {
+    body = `<div class="opts">${q.opts.map((o,i)=>{
+      let c = ""; if(st.picked.includes(i)) c = (i===q.ans)?"right":"wrong"; if(st.done && i===q.ans) c="right";
+      return `<button class="opt ${c}" data-i="${i}" ${st.done||st.picked.includes(i)?"disabled":""}>${o}</button>`;}).join("")}</div>`;
+  }
+  let fb = "";
+  if(st.tries>0 && !st.done) fb = `<div class="fb no">Todavía no. Te quedan ${(q.type==="mc"?2:3)-st.tries} intento(s).</div>`;
+  if(st.done) fb = st.ok ? `<div class="fb ok">¡Correcto! +${st.pts} pts</div>` : `<div class="fb no">Respuesta incorrecta. Esta es la solución:</div>`;
+  const hint = (st.hint && q.hint) ? `<div class="hint"><b>Pista:</b> ${q.hint}</div>` : "";
+  const sol = st.done ? `<div class="sol">${q.type==="num"?q.sol.map(x=>`<div class="eq">${x}</div>`).join(""):q.sol.map(x=>`<div>${x}</div>`).join("")}</div>` : "";
+  const last = S.qi===Q.length-1;
+  app.innerHTML = `<div class="card">${header()}</div>
+  <div class="card"><details open><summary>Datos y esquema del nivel ${q.l+1}</summary>${dataCard(q.l,S.d)}</details></div>
+  <div class="card pop">
+    <div class="tiny">Pregunta ${idx} de ${lvlQs}</div>
+    <p class="qtext">${q.text}</p>
+    ${body}${fb}${hint}${sol}
+    <div class="row">
+      ${!st.done && q.hint && !st.hint ? `<button class="ghost" id="hb">Ver pista (−3)</button>`:""}
+      ${st.done ? `<button class="primary" id="nx">${last?"Ver mi resultado":"Siguiente"}</button>`:""}
+    </div>
+  </div>`;
+  const af = document.getElementById("af");
+  if(af){ af.addEventListener("submit",e=>{ e.preventDefault();
+      const raw = document.getElementById("v").value.trim().replace(/\s/g,"").replace(",",".");
+      const v = parseFloat(raw); if(!isFinite(v)) return;
+      const tol = Math.max(q.abs||0,(q.rel||.02)*Math.abs(q.ans));
+      const ok = Math.abs(v-q.ans)<=tol;
+      st.tries++;
+      if(ok){ st.ok=true; st.done=true; st.pts=Math.max(0,PTS[st.tries-1]-(st.hint?3:0)); }
+      else { st.done=true; st.pts=0; }
+      save(); render();
+      if(!st.done){ const i=document.getElementById("v"); i.value=raw.replace(".",","); i.focus(); i.select(); }
+    });
+    if(!st.done) document.getElementById("v").focus({preventScroll:true});
+  }
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const i = +b.dataset.i; st.picked.push(i); st.tries++;
+    st.done=true;
+    if(i===q.ans){ st.ok=true; st.pts = 10-(st.hint?3:0); }
+    else { st.pts=0; }
+    save(); render();
+  });
+  const hb = document.getElementById("hb"); if(hb) hb.onclick=()=>{ st.hint=true; save(); render(); };
+  const nx = document.getElementById("nx"); if(nx) nx.onclick=()=>{
+    if(last){ S.phase="end"; }
+    else { S.qi++; const nl = Q[S.qi].l; if(nl!==S.lvl){ S.lvl=nl; S.phase="intro"; } }
+    save(); render(); window.scrollTo({top:0});
+  };
+}
+
+function renderEnd(){
+  const Q = build(S.d), tot = total(), max = MAX(), pct = Math.round(tot/max*100);
+  const per = LEVELS.map((L,i)=>{ const ids = Q.map((q,j)=>q.l===i?j:-1).filter(j=>j>=0);
+    return {t:L.t, p:ids.reduce((a,j)=>a+S.res[j].pts,0), m:ids.length*10, ok:ids.filter(j=>S.res[j].ok).length, n:ids.length}; });
+  const msg = pct>=85 ? "Excelente, dominas estos temas." : pct>=60 ? "Vas bien. Repasa el nivel donde perdiste más puntos." : "Repasa las soluciones y vuelve a practicar con otros datos.";
+  const when = new Date().toLocaleString("es-CO",{dateStyle:"medium",timeStyle:"short"});
+  app.innerHTML = `<div class="card pop">
+    <div class="tiny">${esc(S.name)} · datos ${S.d.id} · ${when}</div>
+    <h2>Tu resultado</h2>
+    <div class="big">${tot}<span style="font-size:1.4rem;color:var(--muted)"> / ${max} pts</span></div>
+    <p>${msg}</p>
+    <table><thead><tr><th>Nivel</th><th>Correctas</th><th>Puntos</th></tr></thead><tbody>
+      ${per.map((x,i)=>`<tr><td>${i+1}. ${x.t}</td><td>${x.ok} de ${x.n}</td><td>${x.p} / ${x.m}</td></tr>`).join("")}
+    </tbody></table>
+    <p class="tiny">Toma una captura de esta pantalla y envíasela a tu profesora.</p>
+  </div>
+  <div class="card"><h3>¿Quieres seguir practicando?</h3><p class="tiny">Empiezas de nuevo con datos diferentes. Este resultado se borra, así que toma la captura antes.</p>
+  <button class="ghost" id="again">Practicar con otros datos</button></div>`;
+  document.getElementById("again").onclick=()=>{ try{localStorage.removeItem(KEY);}catch(e){} S=null; render(); };
+}
+
+function render(){
+  if(!S) return renderStart();
+  if(S.phase==="intro") return renderIntro();
+  if(S.phase==="q") return renderQ();
+  return renderEnd();
+}
+S = load(); render();
+})();
+</script>
+</body>
+</html>
