@@ -159,10 +159,10 @@ function build(d){
     sol:[`Mh = ${f(Ms)} × (1 + ${f(d.w/100)})`,`Mh = ${f(Mh)} kg`]});
   Q.push({l:0,type:"num",text:`Un compañero colocó <em>${f(MhP,1)} kg</em> de suelo húmedo en la capa 1, pero sin forzar la caja solo logró compactarla hasta <em>${f(d.hr,1)} cm</em>. La humedad real fue <em>${f(d.wr,1)} %</em>. ¿Qué densidad seca logró?`,unit:"g/cm³",ans:rd,abs:.012,
     hint:"V real = 50 · 50 · h real → ρ = Mh / V real → ρd = ρ / (1 + w real)",
-    sol:[`V real = 50 × 50 × ${f(d.hr,1)} = ${f(Vr,0)} cm³`,`ρ = ${f(MhP*1000,0)} / ${f(Vr,0)} = ${f(rh,3)} g/cm³`,`ρd = ${f(rh,3)} / (1 + ${f(d.wr/100,3)}) = ${f(rd,3)} g/cm³`]});
+    sol:[`V real = 50 × 50 × ${f(d.hr,1)} = ${f(Vr,0)} cm³`,`ρ = ${f(MhP*1000,0)} / ${f(Vr,0)} = ${f(rh,2)} g/cm³`,`ρd = ${f(rh,2)} / (1 + ${f(d.wr/100,2)}) = ${f(rd,2)} g/cm³`]});
   Q.push({l:0,type:"num",text:"Con ese resultado, ¿cuál fue el <em>grado de compactación</em> de esa capa?",unit:"%",ans:gcr,abs:.8,
     hint:"GC = ρd lograda / ρd,máx × 100",
-    sol:[`GC = ${f(rd,3)} / ${f(d.rho)} × 100`,`GC = ${f(gcr,1)} %`]});
+    sol:[`GC = ${f(rd,2)} / ${f(d.rho)} × 100`,`GC = ${f(gcr,2)} %`]});
   Q.push({l:0,type:"mc",text:"Si una capa queda <em>más alta que la marca</em> con la misma masa de suelo, el grado de compactación…",
     opts:["Es menor que el buscado","Es mayor que el buscado","No cambia"],ans:0,
     sol:["La misma masa ocupa más volumen, así que la densidad seca baja y el GC también."]});
@@ -198,16 +198,16 @@ function build(d){
   const icr = gp/GW, hcr = icr*d.a2;
   Q.push({l:2,type:"num",text:"¿Cuál es el gradiente hidráulico <em>i</em> en la arena?",unit:"",ans:i,abs:.006,
     hint:"i = h / H2",
-    sol:[`i = ${f(d.h)} / ${f(d.a2)}`,`i = ${f(i,3)}`]});
+    sol:[`i = ${f(d.h)} / ${f(d.a2)}`,`i = ${f(i,2)}`]});
   Q.push({l:2,type:"num",text:`Esfuerzo total en el punto <em>C</em>, a z = ${f(z)} m bajo A (σC)`,unit:"kPa",ans:s3,
     hint:"σC = H1 · γw + z · γsat",
     sol:[`σC = ${f(d.a1)} × ${f(GW)} + ${f(z)} × ${f(d.gs)}`,`σC = ${f(s3)} kPa`]});
   Q.push({l:2,type:"num",text:"Presión de poros en el punto <em>C</em> (uC)",unit:"kPa",ans:u3,
     hint:"uC = (H1 + z + i · z) · γw",
-    sol:[`uC = (${f(d.a1)} + ${f(z)} + ${f(i,3)} × ${f(z)}) × ${f(GW)}`,`uC = ${f(u3)} kPa`]});
+    sol:[`uC = (${f(d.a1)} + ${f(z)} + ${f(i,2)} × ${f(z)}) × ${f(GW)}`,`uC = ${f(u3)} kPa`]});
   Q.push({l:2,type:"num",text:"Esfuerzo efectivo en el punto <em>C</em> (σ′C)",unit:"kPa",ans:e3,
     hint:"σ′C = σC − uC, o directo: σ′C = z · γ′ − i · z · γw",
-    sol:[`γ′ = ${f(d.gs)} − ${f(GW)} = ${f(gp)} kN/m³`,`σ′C = ${f(z)} × ${f(gp)} − ${f(i,3)} × ${f(z)} × ${f(GW)}`,`σ′C = ${f(e3)} kPa`]});
+    sol:[`γ′ = ${f(d.gs)} − ${f(GW)} = ${f(gp)} kN/m³`,`σ′C = ${f(z)} × ${f(gp)} − ${f(i,2)} × ${f(z)} × ${f(GW)}`,`σ′C = ${f(e3)} kPa`]});
   Q.push({l:2,type:"mc",text:"Comparado con el mismo tanque <em>sin flujo</em>, el esfuerzo efectivo en C con flujo hacia arriba es…",
     opts:["Mayor","Igual","Menor"],ans:2,
     sol:["El agua que sube empuja las partículas hacia arriba: σ′ pierde el término i · z · γw."]});
@@ -216,7 +216,7 @@ function build(d){
     sol:[`σ′B = ${f(d.a2)} × ${f(gp)} − ${f(d.h)} × ${f(GW)}`,`σ′B = ${f(eBB)} kPa`]});
   Q.push({l:2,type:"num",text:"¿Cuál es el gradiente hidráulico <em>crítico</em> i<sub>cr</sub>?",unit:"",ans:icr,abs:.01,
     hint:"Se obtiene haciendo σ′ = 0: icr = γ′ / γw",
-    sol:[`icr = ${f(gp)} / ${f(GW)}`,`icr = ${f(icr,3)}`]});
+    sol:[`icr = ${f(gp)} / ${f(GW)}`,`icr = ${f(icr,2)}`]});
   Q.push({l:2,type:"mc",text:"Si se abre más la válvula y el agua del piezómetro sube (h aumenta), el <em>esfuerzo total</em> en C…",
     opts:["Aumenta, porque hay más presión de agua","Disminuye, porque el agua empuja hacia arriba","No cambia"],ans:2,
     sol:["σ solo depende de lo que hay encima de C: la lámina de agua H1 y el suelo hasta z. Al subir h aumenta u, y por eso baja σ′, pero σ sigue igual."]});
@@ -322,7 +322,7 @@ function renderStart(){
   <div class="card">
     <h3>Cómo se ganan puntos</h3>
     <div class="rules"><b>10</b><span>respuesta correcta</span><b>1</b><span>solo un intento por pregunta: revisa bien antes de responder</span><b>−3</b><span>si pides la pista</span></div>
-    <p class="tiny">Se acepta un pequeño margen por redondeo. Usa γw = 9,81 kN/m³. Puedes escribir decimales con coma o con punto.</p>
+    <p class="tiny">Responde con dos decimales. Se acepta un pequeño margen por redondeo. Usa γw = 9,81 kN/m³. Puedes escribir decimales con coma o con punto.</p>
   </div>
   <form class="card" id="f">
     <label class="lbl" for="nm">Tu nombre</label>
@@ -378,7 +378,7 @@ function renderQ(){
   if(af){ af.addEventListener("submit",e=>{ e.preventDefault();
       const raw = document.getElementById("v").value.trim().replace(/\s/g,"").replace(",",".");
       const v = parseFloat(raw); if(!isFinite(v)) return;
-      const tol = Math.max(q.abs||0,(q.rel||.02)*Math.abs(q.ans));
+      const tol = Math.max(q.abs||0,(q.rel||.02)*Math.abs(q.ans), q.unit==="kPa"?0.15:0);
       const ok = Math.abs(v-q.ans)<=tol;
       st.tries++;
       if(ok){ st.ok=true; st.done=true; st.pts=Math.max(0,PTS[st.tries-1]-(st.hint?3:0)); }
